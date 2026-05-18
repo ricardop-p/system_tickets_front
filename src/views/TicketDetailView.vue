@@ -167,3 +167,4 @@ const escalarTicket = async () => {
 onMounted(recargarTicket)
 </script>
 ```
+//
