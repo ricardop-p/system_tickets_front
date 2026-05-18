@@ -8,10 +8,10 @@
         <div>
           <h1>Sistema de Tickets</h1>
 
-          <p>
+          <!-- <p>
             Plataforma de mesa de ayuda para la gestión,
             escalado y seguimiento de incidencias técnicas.
-          </p>
+          </p> -->
 
           <div class="features">
             <div class="feature-item">
