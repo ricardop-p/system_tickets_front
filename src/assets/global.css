@@ -1,0 +1,36 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Inter, Arial, sans-serif;
+  background: #f4f7fb;
+  color: #1e293b;
+}
+
+button {
+  transition: all 0.25s ease !important;
+}
+
+.card {
+  border-radius: 18px !important;
+  border: none !important;
+}
+
+.btn {
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+}
+
+input,
+select,
+textarea {
+  border-radius: 10px !important;
+}
+
+.badge {
+  padding: 8px 12px;
+  font-size: 0.8rem;
+}

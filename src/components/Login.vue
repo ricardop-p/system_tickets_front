@@ -73,7 +73,7 @@ const handleLogin = async () => {
 </script>
 
 <style scoped>
-/* Tu CSS se mantiene igual, está perfecto */
+
 .info-card {
   border: 1px solid #ccc;
   border-radius: 10px;

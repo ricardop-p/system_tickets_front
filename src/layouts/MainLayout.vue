@@ -1,58 +1,79 @@
 <template>
-  <div class="layout">
-    <header class="layout-header">
-      <nav>
-        <RouterLink to="/">Inicio</RouterLink>
-      </nav>
+  <div class="app-layout">
+
+    <!-- NAVBAR -->
+    <header class="topbar shadow-sm">
+      <div class="container-fluid d-flex justify-content-between align-items-center px-4">
+        
+        <div class="d-flex align-items-center gap-3">
+          <div class="logo-circle">
+            🎫
+          </div>
+
+          <div>
+            <h4 class="m-0 fw-bold text-white">Sistema de Tickets</h4>
+            <small class="text-light opacity-75">
+              Mesa de ayuda y soporte técnico 
+            </small>
+          </div>
+        </div>
+
+        <nav class="d-flex align-items-center gap-3">
+          <RouterLink to="/" class="nav-btn">
+            Inicio
+          </RouterLink>
+
+          <RouterLink to="/tickets" class="nav-btn">
+            Tickets
+          </RouterLink>
+
+          <RouterLink to="/tickets/nuevo" class="nav-btn nav-btn-primary">
+            + Nuevo Ticket
+          </RouterLink>
+        </nav>
+      </div>
     </header>
 
-    <main class="layout-main">
-      <RouterView />
+    <!-- MAIN -->
+    <main class="main-content">
+      <div class="container-fluid py-4 px-md-4 px-3">
+        <RouterView />
+      </div>
     </main>
 
-    <footer class="layout-footer">
-      <p>© 2026 Vue 3 Ejemplo</p>
+    <!-- FOOTER -->
+    <footer class="footer">
+      <p class="m-0">
+        © 2026 Sistema de Tickets • Vue 3 + Pinia + PostgreSQL
+      </p>
     </footer>
   </div>
 </template>
 
 <style scoped>
-.layout {
+.app-layout {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  font-family: Arial, sans-serif;
+  background: #f4f7fb;
 }
 
-.layout-header {
-  background-color: #2c3e50;
-  padding: 1rem 2rem;
+/* TOPBAR */
+.topbar {
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  padding: 1rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 
-.layout-header nav {
+.logo-circle {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
   display: flex;
-  gap: 1.5rem;
-}
-
-.layout-header nav a {
-  color: #fff;
-  text-decoration: none;
-  font-weight: bold;
-}
-
-.layout-header nav a.router-link-active {
-  color: #42b883;
-}
-
-.layout-main {
-  flex: 1;
-  padding: 2rem;
-}
-
-.layout-footer {
-  background-color: #2c3e50;
-  color: #ccc;
-  text-align: center;
-  padding: 1rem;
+  align-items: center;
+  justify-content: center;
 }
 </style>
