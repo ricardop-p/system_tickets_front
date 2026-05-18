@@ -1,4 +1,41 @@
+# Dependencias
 node_modules/
 **/node_modules/
-./agents/
-./agents/**
+
+# Build de producción
+dist/
+build/
+
+# Variables de entorno
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Cache
+.cache/
+.vite/
+.npm/
+.eslintcache
+
+# Testing / coverage
+coverage/
+
+# Editor / IDE
+.vscode/
+.idea/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Carpetas internas o locales
+agents/
+agents/**
