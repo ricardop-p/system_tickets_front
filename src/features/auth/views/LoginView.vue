@@ -44,7 +44,7 @@
 </template>
 
 <script setup>
-import LoginCard from '../components/Login.vue'
+import LoginCard from '@/features/auth/components/Login.vue'
 </script>
 
 <style scoped>

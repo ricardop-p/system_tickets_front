@@ -1,10 +1,17 @@
 import { defineStore } from 'pinia'
+import { decodeJwt, getRoleFromToken, isAdminToken } from '../utils/jwt'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: JSON.parse(localStorage.getItem('user')) || null,
-    token: localStorage.getItem('token') || null,
+    token: localStorage.getItem('token') || null
   }),
+  getters: {
+    isAuthenticated: (state) => Boolean(state.token),
+    tokenPayload: (state) => decodeJwt(state.token),
+    userRole: (state) => getRoleFromToken(state.token),
+    isAdmin: (state) => isAdminToken(state.token)
+  },
   actions: {
     login(userData, token) {
       this.user = userData
@@ -15,7 +22,8 @@ export const useAuthStore = defineStore('auth', {
     logout() {
       this.user = null
       this.token = null
-      localStorage.clear()
+      localStorage.removeItem('user')
+      localStorage.removeItem('token')
     }
   }
 })

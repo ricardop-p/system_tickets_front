@@ -37,39 +37,16 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import axios from 'axios';
-import { useAuthStore } from '../stores/auth'; // 1. Importamos el almacén (Pinia)
-import { useRouter } from 'vue-router';      // 2. Importamos el router para navegar
+import { ref } from 'vue'
+import { useAuth } from '@/features/auth/composables/useAuth'
 
-const email = ref('');
-const password = ref('');
-const errorMessage = ref('');
-
-const auth = useAuthStore(); // Instancia de Pinia
-const router = useRouter();  // Instancia del Router
+const email = ref('')
+const password = ref('')
+const { login, errorMessage, loading } = useAuth()
 
 const handleLogin = async () => {
-  try {
-    errorMessage.value = ""; 
-    const res = await axios.post('http://localhost:3000/api/login', {
-      email: email.value,
-      password: password.value
-    });
-    
-    // 3. Usamos la acción de Pinia para guardar usuario y token
-    // Asumiendo que tu backend responde con { user, token }
-    auth.login(res.data.user, res.data.token);
-    
-    alert(`¡Bienvenido de nuevo, ${res.data.user.nombre}!`);
-    
-    // 4. Redirigimos automáticamente a la vista de tickets
-    router.push('/tickets');
-    
-  } catch (err) {
-    errorMessage.value = err.response?.data?.message || "Error al conectar con el servidor";
-  }
-};
+  await login({ email: email.value, password: password.value })
+}
 </script>
 
 <style scoped>

@@ -61,37 +61,30 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import axios from 'axios';
-import { useAuthStore } from '../stores/auth';
-import { useRouter } from 'vue-router';
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useTickets } from '@/features/tickets/composables/useTickets'
 
-const auth = useAuthStore();
-const router = useRouter();
+const router = useRouter()
+const { createNewTicket } = useTickets()
 
 const ticket = ref({
   titulo: '',
   descripcion: '',
   prioridad: 'Media'
-});
+})
 
 const enviarTicket = async () => {
   try {
-    // IMPORTANTE: Enviamos el token en los headers para que el controlador sepa quién eres
-    await axios.post('http://localhost:3000/api/tickets', ticket.value, {
-      headers: { 
-        Authorization: `Bearer ${auth.token}` 
-      }
-    });
-
-    alert("✅ Ticket registrado correctamente. El equipo de soporte será notificado.");
-    router.push('/tickets'); // Regresamos al listado automáticamente
+    await createNewTicket(ticket.value)
+    alert('✅ Ticket registrado correctamente. El equipo de soporte será notificado.')
+    router.push('/tickets')
   } catch (error) {
-    console.error("Error al crear ticket:", error);
-    const msg = error.response?.data?.error || "Error de conexión con el servidor";
-    alert("❌ Hubo un fallo: " + msg);
+    console.error('Error al crear ticket:', error)
+    const msg = error.response?.data?.error || 'Error de conexión con el servidor'
+    alert('❌ Hubo un fallo: ' + msg)
   }
-};
+}
 </script>
 
 <style scoped>

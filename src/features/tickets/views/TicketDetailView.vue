@@ -96,74 +96,42 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import axios from 'axios'
-import { useAuthStore } from '../stores/auth'
+import { useTickets } from '@/features/tickets/composables/useTickets'
 
 const route = useRoute()
-const auth = useAuthStore()
-const ticket = ref(null)
+const {
+  ticket,
+  loadTicket,
+  badgePrio,
+  formatearFecha,
+  changeTicketState,
+  escalate
+} = useTickets()
 
-const badgePrio = (p) => {
-  if (p === 'Crítica') return 'badge bg-danger'
-  if (p === 'Alta') return 'badge bg-warning text-dark'
-  return 'badge bg-info text-dark'
-}
-
-const formatearFecha = (f) => new Date(f).toLocaleString('es-CO')
-
-//  RECARGAR TICKET
 const recargarTicket = async () => {
-  try {
-    const res = await axios.get(`http://localhost:3000/api/tickets/${route.params.id}`, {
-      headers: { Authorization: `Bearer ${auth.token}` }
-    })
-    ticket.value = res.data
-  } catch (error) {
-    console.error("Error recargando ticket:", error)
-  }
+  await loadTicket(route.params.id)
 }
 
-//  CAMBIAR ESTADO
 const cambiarEstado = async (estado) => {
   try {
-    await axios.put(
-      `http://localhost:3000/api/tickets/${route.params.id}/estado`,
-      { estado },
-      {
-        headers: { Authorization: `Bearer ${auth.token}` }
-      }
-    )
-
-    recargarTicket()
-
+    await changeTicketState(route.params.id, estado)
   } catch (error) {
     console.error(error)
-    alert("Error al cambiar estado")
+    alert('Error al cambiar estado')
   }
 }
 
-// 🔺 ESCALAR
 const escalarTicket = async () => {
   try {
-    await axios.put(
-      `http://localhost:3000/api/tickets/${route.params.id}/escalar`,
-      {},
-      {
-        headers: { Authorization: `Bearer ${auth.token}` }
-      }
-    )
-
-    recargarTicket()
-
+    await escalate(route.params.id)
   } catch (error) {
     console.error(error)
-    alert("Error al escalar ticket")
+    alert('Error al escalar ticket')
   }
 }
 
-// 🔥 CARGA INICIAL
 onMounted(recargarTicket)
 </script>
 ```

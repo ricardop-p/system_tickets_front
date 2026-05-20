@@ -30,6 +30,10 @@
           <RouterLink to="/tickets/nuevo" class="nav-btn nav-btn-primary">
             + Nuevo Ticket
           </RouterLink>
+
+          <RouterLink v-if="auth.isAdmin" to="/admin" class="nav-btn nav-btn-admin">
+            Admin
+          </RouterLink>
         </nav>
       </div>
     </header>
@@ -49,6 +53,12 @@
     </footer>
   </div>
 </template>
+
+<script setup>
+import { useAuthStore } from '@/features/auth/store/authStore'
+
+const auth = useAuthStore()
+</script>
 
 <style scoped>
 .app-layout {
@@ -75,5 +85,42 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.nav-btn {
+  color: #e5e7eb;
+  text-decoration: none;
+  font-weight: 700;
+  padding: 0.55rem 0.8rem;
+  border-radius: 8px;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.nav-btn:hover,
+.nav-btn.router-link-active {
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+}
+
+.nav-btn-primary {
+  background: #22c55e;
+  color: #052e16;
+}
+
+.nav-btn-primary:hover,
+.nav-btn-primary.router-link-active {
+  background: #16a34a;
+  color: #fff;
+}
+
+.nav-btn-admin {
+  background: #38bdf8;
+  color: #082f49;
+}
+
+.nav-btn-admin:hover,
+.nav-btn-admin.router-link-active {
+  background: #0284c7;
+  color: #fff;
 }
 </style>

@@ -1,19 +1,27 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { useAuthStore } from '../stores/auth'
+import { useAuthStore } from '../features/auth/store/authStore'
 
 import MainLayout from '../layouts/MainLayout.vue'
-import HomeView from '../views/HomeView.vue'
+import HomeView from '../features/auth/views/LoginView.vue'
 import AboutView from '../views/AboutView.vue'
-import TicketsView from '../views/TicketsView.vue'
-import TicketDetailView from '../views/TicketDetailView.vue'
-import CreateTicketView from '../views/CreateTicketView.vue'
+import TicketsView from '../features/tickets/views/TicketsView.vue'
+import TicketDetailView from '../features/tickets/views/TicketDetailView.vue'
+import CreateTicketView from '../features/tickets/views/CreateTicketView.vue'
+import AdminDashboardView from '../features/admin/views/AdminDashboardView.vue'
+import AdminCategoriesView from '../features/admin/views/AdminCategoriesView.vue'
+import AdminUsersView from '../features/admin/views/AdminUsersView.vue'
+import AdminTicketsView from '../features/admin/views/AdminTicketsView.vue'
 
 const routes = [
   {
     path: '/',
+    name: 'login',
+    component: HomeView
+  },
+  {
+    path: '/',
     component: MainLayout,
     children: [
-      { path: '', name: 'home', component: HomeView },
       { path: 'about', name: 'about', component: AboutView },
       
 
@@ -41,6 +49,30 @@ const routes = [
         props: true, 
         meta: { requiresAuth: true } 
       },
+      {
+        path: 'admin',
+        name: 'admin-dashboard',
+        component: AdminDashboardView,
+        meta: { requiresAuth: true, requiresAdmin: true }
+      },
+      {
+        path: 'admin/categorias',
+        name: 'admin-categories',
+        component: AdminCategoriesView,
+        meta: { requiresAuth: true, requiresAdmin: true }
+      },
+      {
+        path: 'admin/usuarios',
+        name: 'admin-users',
+        component: AdminUsersView,
+        meta: { requiresAuth: true, requiresAdmin: true }
+      },
+      {
+        path: 'admin/tickets',
+        name: 'admin-tickets',
+        component: AdminTicketsView,
+        meta: { requiresAuth: true, requiresAdmin: true }
+      },
     ],
   },
 
@@ -64,6 +96,11 @@ router.beforeEach((to, from, next) => {
   if (to.meta.requiresAuth && !auth.token) {
     alert('Debes iniciar sesión para ver esta sección')
     return next('/')
+  }
+
+  if (to.meta.requiresAdmin && !auth.isAdmin) {
+    alert('No tienes permisos para acceder a esta seccion')
+    return next('/tickets')
   }
 
   //  VALIDAR ID EN DETALLE
