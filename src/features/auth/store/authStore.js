@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { decodeJwt, getRoleFromToken, isAdminToken } from '../utils/jwt'
+import { decodeJwt, getRoleFromToken, getRoleFromUser, isAdminToken, isAgentToken } from '../utils/jwt'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -9,8 +9,15 @@ export const useAuthStore = defineStore('auth', {
   getters: {
     isAuthenticated: (state) => Boolean(state.token),
     tokenPayload: (state) => decodeJwt(state.token),
-    userRole: (state) => getRoleFromToken(state.token),
-    isAdmin: (state) => isAdminToken(state.token)
+    userRole: (state) => getRoleFromToken(state.token) || getRoleFromUser(state.user),
+    isAdmin: (state) => {
+      const role = getRoleFromToken(state.token) || getRoleFromUser(state.user)
+      return isAdminToken(state.token) || role === 'admin' || role === 'administrador'
+    },
+    isAgent: (state) => {
+      const role = getRoleFromToken(state.token) || getRoleFromUser(state.user)
+      return isAgentToken(state.token) || role === 'agente' || role === 'tecnico' || role === 'técnico' || role === 'agent'
+    }
   },
   actions: {
     login(userData, token) {

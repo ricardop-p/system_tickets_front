@@ -44,7 +44,27 @@ export const getRoleFromToken = (token) => {
   return String(role).toLowerCase()
 }
 
+export const getRoleFromUser = (user) => {
+  if (!user) return ''
+
+  const role =
+    user.rol ||
+    user.role ||
+    user.tipo ||
+    user.tipo_usuario ||
+    user.user_type ||
+    user.perfil ||
+    ''
+
+  return String(role).toLowerCase()
+}
+
 export const isAdminToken = (token) => {
   const role = getRoleFromToken(token)
   return role === 'admin' || role === 'administrador'
+}
+
+export const isAgentToken = (token) => {
+  const role = getRoleFromToken(token)
+  return role === 'agente' || role === 'tecnico' || role === 'técnico' || role === 'agent'
 }

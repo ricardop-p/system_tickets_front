@@ -8,9 +8,10 @@ import TicketsView from '../features/tickets/views/TicketsView.vue'
 import TicketDetailView from '../features/tickets/views/TicketDetailView.vue'
 import CreateTicketView from '../features/tickets/views/CreateTicketView.vue'
 import AdminDashboardView from '../features/admin/views/AdminDashboardView.vue'
-import AdminCategoriesView from '../features/admin/views/AdminCategoriesView.vue'
-import AdminUsersView from '../features/admin/views/AdminUsersView.vue'
 import AdminTicketsView from '../features/admin/views/AdminTicketsView.vue'
+import UsersManagementView from '../features/users/views/UsersManagementView.vue'
+import CategoriesManagementView from '../features/categories/views/CategoriesManagementView.vue'
+import SlaPoliciesView from '../features/sla/views/SlaPoliciesView.vue'
 
 const routes = [
   {
@@ -23,6 +24,12 @@ const routes = [
     component: MainLayout,
     children: [
       { path: 'about', name: 'about', component: AboutView },
+      {
+        path: 'dashboard',
+        name: 'dashboard',
+        component: AdminDashboardView,
+        meta: { requiresAuth: true }
+      },
       
 
       //  VER TICKETS
@@ -52,19 +59,19 @@ const routes = [
       {
         path: 'admin',
         name: 'admin-dashboard',
-        component: AdminDashboardView,
-        meta: { requiresAuth: true, requiresAdmin: true }
+        redirect: '/dashboard',
+        meta: { requiresAuth: true }
       },
       {
         path: 'admin/categorias',
         name: 'admin-categories',
-        component: AdminCategoriesView,
+        component: CategoriesManagementView,
         meta: { requiresAuth: true, requiresAdmin: true }
       },
       {
         path: 'admin/usuarios',
         name: 'admin-users',
-        component: AdminUsersView,
+        component: UsersManagementView,
         meta: { requiresAuth: true, requiresAdmin: true }
       },
       {
@@ -73,13 +80,22 @@ const routes = [
         component: AdminTicketsView,
         meta: { requiresAuth: true, requiresAdmin: true }
       },
+      {
+        path: 'admin/politicas-sla',
+        name: 'admin-sla-policies',
+        component: SlaPoliciesView,
+        meta: { requiresAuth: true, requiresAdmin: true }
+      },
     ],
   },
 
   // RUTA NO ENCONTRADA 
   {
     path: '/:pathMatch(.*)*',
-    redirect: '/'
+    redirect: () => {
+      const auth = useAuthStore()
+      return auth.token ? '/dashboard' : '/'
+    }
   }
 ]
 
