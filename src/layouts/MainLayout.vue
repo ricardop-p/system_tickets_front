@@ -12,10 +12,12 @@
       <nav class="sidebar-nav">
         <span class="nav-label">Navegacion</span>
 
-        <RouterLink to="/dashboard" class="sidebar-link">
+        <RouterLink :to="auth.isAdmin || auth.isAgent ? '/dashboard' : '/tickets'" class="sidebar-link">
           <span class="sidebar-icon">=</span>
-          Seguimiento de tickets
+          {{ auth.isAdmin || auth.isAgent ? 'Seguimiento de tickets' : 'Mis Solicitudes' }}
         </RouterLink>
+
+        
 
         <template v-if="auth.isAdmin">
           <RouterLink to="/admin/usuarios" class="sidebar-link">
@@ -32,6 +34,12 @@
             <span class="sidebar-icon">o</span>
             Politicas SLA
           </RouterLink>
+
+          <RouterLink to="/validador-edad" class="sidebar-link">
+          <span class="sidebar-icon">18</span>
+          Validador de edad
+        </RouterLink>
+        
         </template>
       </nav>
 
@@ -98,6 +106,7 @@ const userName = computed(() => (
 ))
 
 const userEmail = computed(() => (
+  auth.user?.name ||
   auth.user?.email ||
   auth.user?.correo ||
   auth.tokenPayload?.email ||
@@ -108,13 +117,13 @@ const userEmail = computed(() => (
 const roleLabel = computed(() => {
   if (auth.isAdmin) return 'Administrador'
   if (auth.isAgent) return 'Agente tecnico'
-  return 'Usuario'
+  return 'Solicitante'
 })
 
 const scopeLabel = computed(() => {
   if (auth.isAdmin) return 'Gestion interna autorizada'
   if (auth.isAgent) return 'Tickets asignados a tu mesa'
-  return 'Tickets creados por ti'
+  return 'Gestion interna autorizada'
 })
 
 const userInitial = computed(() => userName.value.charAt(0).toUpperCase())

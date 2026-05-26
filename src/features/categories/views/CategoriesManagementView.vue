@@ -36,7 +36,7 @@
             </td>
             <td class="text-end">
               <button type="button" class="danger-outline" @click="toggleStatus(category)">
-                {{ categoryStatus(category) === 'activo' ? 'Desactivar' : 'Activar' }}
+                {{ categoryStatus(category) ? 'Desactivar' : 'Activar' }}
               </button>
             </td>
           </tr>
@@ -116,12 +116,20 @@ const submitCategory = async () => {
 const categoryId = (category) => category.id || category.uid || category.codigo || 'N/A'
 const categoryName = (category) => category.nombre || category.name || 'Sin categoria'
 const categoryDescription = (category) => category.descripcion || category.description || 'Sin descripcion'
-const categoryStatus = (category) => String(category.estado || category.status || (category.activo === false ? 'inactivo' : 'activo')).toLowerCase()
-const statusLabel = (status) => status === 'inactivo' || status === 'desactivado' ? 'Desactivado' : 'Activado'
-const statusClass = (status) => status === 'inactivo' || status === 'desactivado' ? 'status-pill status-off' : 'status-pill status-on'
+const categoryStatus = (category) => {
+  if (typeof category.active === 'boolean') return category.active
+  if (typeof category.is_active === 'boolean') return category.is_active
+  if (typeof category.activo === 'boolean') return category.activo
+
+  const status = String(category.estado || category.status || '').toLowerCase()
+  return status ? status === 'activo' || status === 'active' : true
+}
+
+const statusLabel = (isActive) => isActive ? 'Activo' : 'Desactivado'
+const statusClass = (isActive) => isActive ? 'status-pill status-on' : 'status-pill status-off'
 
 const toggleStatus = async (category) => {
-  const nextStatus = categoryStatus(category) === 'activo' ? 'inactivo' : 'activo'
+  const nextStatus = !categoryStatus(category)
   await changeStatus(categoryId(category), nextStatus)
 }
 

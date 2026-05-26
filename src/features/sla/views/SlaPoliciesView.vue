@@ -20,7 +20,7 @@
             <th>Tipo prioridad</th>
             <th>Limite primera atencion (SLA)</th>
             <th>Limite de resolucion total (SLA)</th>
-            <th class="text-end">Acciones</th>
+            <!-- <th class="text-end">Acciones</th> -->
           </tr>
         </thead>
         <tbody>
@@ -32,7 +32,7 @@
             <td class="strong-text">{{ policy.firstResponse }}</td>
             <td class="strong-text">{{ policy.resolution }}</td>
             <td class="text-end">
-              <button type="button" class="outline-action">Modificar SLA</button>
+              <!-- <button type="button" class="outline-action">Modificar SLA</button> -->
             </td>
           </tr>
           <tr v-if="normalizedPolicies.length === 0">
@@ -50,12 +50,37 @@ import { useSlaPolicies } from '@/features/sla/composables/useSlaPolicies'
 
 const { policies, loading, error, loadPolicies } = useSlaPolicies()
 
+const firstDefined = (...values) => values.find((value) => value !== null && value !== undefined && value !== '')
+
+const formatLevel = (policy, index) => {
+  const level = firstDefined(policy.nivel, policy.level, index + 1)
+  const value = String(level)
+
+  return value.toLowerCase().includes('nivel') ? value : `Nivel ${value}`
+}
+
+const formatDays = (days, suffix) => {
+  if (days === null || days === undefined || days === '') return 'N/A'
+
+  const value = Number(days)
+
+  if (!Number.isFinite(value)) return String(days)
+
+  return `${value} ${value === 1 ? 'Dia' : 'Dias'} ${suffix}`
+}
+
 const normalizedPolicies = computed(() => policies.value.map((policy, index) => ({
   id: policy.id || policy.uid || index + 1,
-  level: policy.nivel || policy.level || `Nivel ${index + 1}`,
-  priority: policy.prioridad || policy.priority || 'Media',
-  firstResponse: policy.limite_primera_atencion || policy.first_response_limit || policy.primera_atencion || 'N/A',
-  resolution: policy.limite_resolucion || policy.resolution_limit || policy.resolucion || 'N/A'
+  level: formatLevel(policy, index),
+  priority: firstDefined(policy.name, policy.nombre, policy.prioridad, policy.priority, 'Media'),
+  firstResponse: formatDays(
+    firstDefined(policy.response_days, policy.limite_primera_atencion, policy.first_response_limit, policy.primera_atencion),
+    'de atencion'
+  ),
+  resolution: formatDays(
+    firstDefined(policy.resolution_days, policy.limite_resolucion, policy.resolution_limit, policy.resolucion),
+    'para solucion'
+  )
 })))
 
 const priorityClass = (priority) => {

@@ -12,10 +12,10 @@
       </button>
     </div>
 
-    <div v-if="loading" class="state-box">Cargando usuarios...</div>
-    <div v-else-if="error" class="alert alert-danger">{{ error }}</div>
+    <div v-if="loading && users.length === 0" class="state-box">Cargando usuarios...</div>
+    <div v-if="error" class="alert-box">{{ error }}</div>
 
-    <section v-else class="users-table-card">
+    <section v-if="!loading || users.length > 0" class="users-table-card">
       <table class="users-table">
         <thead>
           <tr>
@@ -23,7 +23,7 @@
             <th>Correo electronico</th>
             <th>Nivel de seguridad (rol)</th>
             <th>Estado local</th>
-            <th class="text-end">Acciones</th>
+            <!-- <th class="text-end">Acciones</th> -->
           </tr>
         </thead>
         <tbody>
@@ -44,12 +44,7 @@
             <td>
               <span :class="statusClass(userStatus(user))">{{ statusLabel(userStatus(user)) }}</span>
             </td>
-            <td>
-              <div class="actions">
-                <button type="button" title="Ver usuario">o</button>
-                <button type="button" title="Editar usuario">/</button>
-              </div>
-            </td>
+         
           </tr>
           <tr v-if="users.length === 0">
             <td colspan="5" class="empty-row">No hay usuarios registrados.</td>
@@ -72,6 +67,11 @@
           </label>
 
           <label>
+            Ingresa la edads
+            <input v-model="form.age" type="text" placeholder="Por ejemplo: 18" required />
+          </label>
+
+          <label>
             Correo corporativo
             <input v-model="form.email" type="email" placeholder="ejemplo@sla.com" required />
           </label>
@@ -86,9 +86,9 @@
             <label>
               Rol de sistema
               <select v-model="form.rol">
-                <option value="usuario">Solicitante (User)</option>
-                <option value="agente">Soporte Tecnico</option>
-                <option value="admin">Administrador</option>
+                <option value="USER">Solicitante (User)</option>
+                <option value="AGENT">Soporte Tecnico</option>
+                <option value="ADMIN">Administrador</option>
               </select>
             </label>
 
@@ -119,20 +119,23 @@ import { useUsers } from '@/features/users/composables/useUsers'
 
 const { users, loading, saving, error, loadUsers, saveUser } = useUsers()
 const showModal = ref(false)
+const allowedRoles = ['ADMIN', 'AGENT', 'USER']
 
 const form = reactive({
   nombre: '',
   email: '',
   password: '',
-  rol: 'usuario',
+  age: '',
+  rol: 'USER',
   estado: 'activo'
 })
 
 const resetForm = () => {
   form.nombre = ''
+  form.age = ''
   form.email = ''
   form.password = ''
-  form.rol = 'usuario'
+  form.rol = 'USER'
   form.estado = 'activo'
 }
 
@@ -145,27 +148,44 @@ const closeModal = () => {
   showModal.value = false
 }
 
+const createUserPayload = () => {
+  const role = allowedRoles.includes(form.rol) ? form.rol : 'USER'
+
+  return {
+    name: form.nombre,
+    email: form.email,
+    age: form.age,
+    password: form.password,
+    role,
+    is_active: form.estado === 'activo'
+  }
+}
+
 const submitUser = async () => {
-  await saveUser({ ...form })
-  closeModal()
+  try {
+    await saveUser(createUserPayload())
+    closeModal()
+  } catch (err) {
+    alert(error.value || err.response?.data?.message || err.response?.data?.error || 'No se pudo guardar el usuario')
+  }
 }
 
 const userId = (user) => user.id || user.uid || user.user_id || 'N/A'
 const userName = (user) => user.nombre || user.name || user.username || 'Sin nombre'
 const userEmail = (user) => user.email || user.correo || 'Sin email'
 const userRole = (user) => String(user.rol || user.role || user.tipo || user.tipo_usuario || 'usuario').toLowerCase()
-const userStatus = (user) => String(user.estado || user.status || (user.activo === false ? 'inactivo' : 'activo')).toLowerCase()
+const userStatus = (user) => String(user.estado || user.status || (user.is_active === false || user.activo === false ? 'inactivo' : 'activo')).toLowerCase()
 const userInitial = (user) => userName(user).charAt(0).toUpperCase()
 
 const roleLabel = (role) => {
   if (role === 'admin' || role === 'administrador') return 'Administrador'
-  if (role === 'agente' || role === 'tecnico' || role === 'técnico') return 'Soporte Tecnico'
+  if (role === 'agent' || role === 'agente' || role === 'tecnico' || role === 'técnico') return 'Soporte Tecnico'
   return 'Solicitante'
 }
 
 const roleClass = (role) => {
   if (role === 'admin' || role === 'administrador') return 'role-pill role-admin'
-  if (role === 'agente' || role === 'tecnico' || role === 'técnico') return 'role-pill role-agent'
+  if (role === 'agent' || role === 'agente' || role === 'tecnico' || role === 'técnico') return 'role-pill role-agent'
   return 'role-pill role-user'
 }
 
@@ -317,6 +337,15 @@ onMounted(loadUsers)
   color: #64748b;
   padding: 28px;
   text-align: center;
+}
+
+.alert-box {
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  color: #b91c1c;
+  font-weight: 800;
+  padding: 14px 18px;
 }
 
 .modal-backdrop {

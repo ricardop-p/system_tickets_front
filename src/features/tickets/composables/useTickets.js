@@ -6,6 +6,7 @@ export function useTickets() {
   const auth = useAuthStore()
   const tickets = ref([])
   const ticket = ref(null)
+  const comments = ref([])
   const loading = ref(false)
   const error = ref(null)
 
@@ -46,9 +47,11 @@ export function useTickets() {
 
     try {
       ticket.value = await ticketService.fetchTicketById(id, auth.token)
+      comments.value = await ticketService.fetchTicketComments(id, auth.token)
     } catch (err) {
-      error.value = err.response?.data?.message || 'Error cargando ticket'
+      error.value = err.response?.data?.message || err.response?.data?.error || 'Error cargando ticket'
       ticket.value = null
+      comments.value = []
     } finally {
       loading.value = false
     }
@@ -59,9 +62,25 @@ export function useTickets() {
     error.value = null
 
     try {
-      await ticketService.createTicket(ticketData, auth.token)
+      return await ticketService.createTicket(ticketData, auth.token)
     } catch (err) {
-      error.value = err.response?.data?.message || 'Error creando ticket'
+      error.value = err.response?.data?.message || err.response?.data?.error || 'Error creando ticket'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const createComment = async (ticketId, comment) => {
+    loading.value = true
+    error.value = null
+
+    try {
+      const createdComment = await ticketService.createTicketComment(ticketId, comment, auth.token)
+      comments.value = await ticketService.fetchTicketComments(ticketId, auth.token)
+      return createdComment
+    } catch (err) {
+      error.value = err.response?.data?.message || err.response?.data?.error || 'Error creando comentario'
       throw err
     } finally {
       loading.value = false
@@ -101,6 +120,7 @@ export function useTickets() {
   return {
     tickets,
     ticket,
+    comments,
     loading,
     error,
     obtenerImagen,
@@ -109,6 +129,7 @@ export function useTickets() {
     loadTickets,
     loadTicket,
     createNewTicket,
+    createComment,
     changeTicketState,
     escalate
   }

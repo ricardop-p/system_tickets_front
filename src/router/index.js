@@ -12,6 +12,7 @@ import AdminTicketsView from '../features/admin/views/AdminTicketsView.vue'
 import UsersManagementView from '../features/users/views/UsersManagementView.vue'
 import CategoriesManagementView from '../features/categories/views/CategoriesManagementView.vue'
 import SlaPoliciesView from '../features/sla/views/SlaPoliciesView.vue'
+import AgeValidatorView from '../features/age-validator/views/AgeValidatorView.vue'
 
 const routes = [
   {
@@ -28,6 +29,12 @@ const routes = [
         path: 'dashboard',
         name: 'dashboard',
         component: AdminDashboardView,
+        meta: { requiresAuth: true }
+      },
+      {
+        path: 'validador-edad',
+        name: 'age-validator',
+        component: AgeValidatorView,
         meta: { requiresAuth: true }
       },
       
@@ -116,6 +123,10 @@ router.beforeEach((to, from, next) => {
 
   if (to.meta.requiresAdmin && !auth.isAdmin) {
     alert('No tienes permisos para acceder a esta seccion')
+    return next('/tickets')
+  }
+
+  if (to.name === 'dashboard' && !auth.isAdmin && !auth.isAgent) {
     return next('/tickets')
   }
 

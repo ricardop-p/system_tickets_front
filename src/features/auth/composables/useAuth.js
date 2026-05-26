@@ -15,7 +15,7 @@ export function useAuth() {
       errorMessage.value = ''
       const data = await loginUser({ email, password })
       auth.login(data.user, data.token)
-      await router.push('/dashboard')
+      await router.push(auth.isAdmin || auth.isAgent ? '/dashboard' : '/tickets')
     } catch (error) {
       errorMessage.value = error.response?.data?.message || 'Error al conectar con el servidor'
     } finally {

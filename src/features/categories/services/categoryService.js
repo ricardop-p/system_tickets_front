@@ -16,7 +16,7 @@ export const createCategory = async (categoryData, token) => {
   return response.data
 }
 
-export const updateCategoryStatus = async (id, estado, token) => {
-  const response = await api.patch('/api/categories/status', { id, estado }, authHeaders(token))
+export const updateCategoryStatus = async (id, isActive, token) => {
+  const response = await api.patch('/categories/status', { id, isActive }, authHeaders(token))
   return response.data
 }

@@ -37,12 +37,12 @@ export function useCategories() {
     }
   }
 
-  const changeStatus = async (id, estado) => {
+  const changeStatus = async (id, isActive) => {
     saving.value = true
     error.value = null
 
     try {
-      await categoryService.updateCategoryStatus(id, estado, auth.token)
+      await categoryService.updateCategoryStatus(id, isActive, auth.token)
       await loadCategories()
     } catch (err) {
       error.value = err.response?.data?.message || err.response?.data?.error || 'Error actualizando categoria'

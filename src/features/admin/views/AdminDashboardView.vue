@@ -113,6 +113,7 @@
               <th>Estado</th>
               <th>SLA</th>
               <th>Creado</th>
+              <th class="text-end">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -123,13 +124,13 @@
               <td>{{ agentName(ticket) }}</td>
               <td>{{ categoryName(ticket) }}</td>
               <td>
-                <span :class="priorityClass(ticket.prioridad || ticket.priority)">
-                  {{ ticket.prioridad || ticket.priority || 'Media' }}
+                <span :class="priorityClass(priorityName(ticket))">
+                  {{ priorityName(ticket) }}
                 </span>
               </td>
               <td>
                 <span :class="statusClass(ticket.estado || ticket.status)">
-                  {{ ticket.estado || ticket.status || 'Abierto' }}
+                  {{ statusLabel(ticket.estado || ticket.status) }}
                 </span>
               </td>
               <td>
@@ -138,9 +139,14 @@
                 </span>
               </td>
               <td>{{ formatDate(ticket.created_at || ticket.fecha_creacion || ticket.createdAt) }}</td>
+              <td class="text-end">
+                <button type="button" class="row-action" @click="goToDetail(ticket.id)">
+                  Ver ficha
+                </button>
+              </td>
             </tr>
             <tr v-if="filteredTickets.length === 0">
-              <td colspan="9" class="text-center text-muted py-4">No hay tickets con los filtros aplicados.</td>
+              <td colspan="10" class="text-center text-muted py-4">No hay tickets con los filtros aplicados.</td>
             </tr>
           </tbody>
         </table>
@@ -151,10 +157,12 @@
 
 <script setup>
 import { computed, onMounted, reactive } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/features/auth/store/authStore'
 import { useDashboardTickets } from '@/features/dashboard/composables/useDashboardTickets'
 
 const auth = useAuthStore()
+const router = useRouter()
 const { tickets, loading, error, loadTickets } = useDashboardTickets()
 
 const filters = reactive({
@@ -169,6 +177,7 @@ const filters = reactive({
 const normalize = (value) => String(value || '').trim().toLowerCase()
 
 const requesterName = (ticket) => (
+  ticket.requester_name ||
   ticket.solicitante ||
   ticket.solicitante_nombre ||
   ticket.usuario_nombre ||
@@ -178,6 +187,7 @@ const requesterName = (ticket) => (
 )
 
 const agentName = (ticket) => (
+  ticket.assigned_agent_name ||
   ticket.agente_asignado ||
   ticket.agente_nombre ||
   ticket.tecnico_nombre ||
@@ -187,11 +197,14 @@ const agentName = (ticket) => (
 )
 
 const categoryName = (ticket) => (
+  ticket.category_name ||
   ticket.categoria ||
   ticket.categoria_nombre ||
   ticket.category ||
   'Sin categoria'
 )
+
+const priorityName = (ticket) => ticket.priority_name || ticket.prioridad || ticket.priority || 'Media'
 
 const uniqueOptions = (getter) => computed(() => {
   const values = tickets.value.map(getter).filter(Boolean)
@@ -199,7 +212,7 @@ const uniqueOptions = (getter) => computed(() => {
 })
 
 const statusOptions = uniqueOptions((ticket) => ticket.estado || ticket.status)
-const priorityOptions = uniqueOptions((ticket) => ticket.prioridad || ticket.priority)
+const priorityOptions = uniqueOptions(priorityName)
 const categoryOptions = uniqueOptions(categoryName)
 const agentOptions = uniqueOptions(agentName)
 
@@ -207,11 +220,11 @@ const isUnassigned = (ticket) => normalize(agentName(ticket)) === 'sin asignar'
 const isEscalated = (ticket) => normalize(ticket.estado || ticket.status).includes('escal')
 const isClosed = (ticket) => {
   const status = normalize(ticket.estado || ticket.status)
-  return status.includes('cerr') || status.includes('resuel')
+  return status.includes('closed') || status.includes('cerr') || status.includes('resolved') || status.includes('resuel')
 }
 const isInProgress = (ticket) => {
   const status = normalize(ticket.estado || ticket.status)
-  return status.includes('proceso') || status.includes('trabajo') || status.includes('asign')
+  return status.includes('progress') || status.includes('proceso') || status.includes('trabajo') || status.includes('assign') || status.includes('asign') || status.includes('hold')
 }
 const isSlaExpired = (ticket) => {
   const sla = normalize(ticket.sla || ticket.estado_sla || ticket.sla_status)
@@ -239,12 +252,13 @@ const filteredTickets = computed(() => {
       ticket.title,
       requesterName(ticket),
       agentName(ticket),
-      categoryName(ticket)
+      categoryName(ticket),
+      priorityName(ticket)
     ].join(' '))
 
     const matchesSearch = !search || searchable.includes(search)
     const matchesStatus = !filters.status || normalize(ticket.estado || ticket.status) === normalize(filters.status)
-    const matchesPriority = !filters.priority || normalize(ticket.prioridad || ticket.priority) === normalize(filters.priority)
+    const matchesPriority = !filters.priority || normalize(priorityName(ticket)) === normalize(filters.priority)
     const matchesCategory = !filters.category || normalize(categoryName(ticket)) === normalize(filters.category)
     const matchesAgent = !filters.agent || normalize(agentName(ticket)) === normalize(filters.agent)
     const matchesSla = !filters.sla || (filters.sla === 'expired' ? isSlaExpired(ticket) : !isSlaExpired(ticket))
@@ -270,11 +284,23 @@ const priorityClass = (priority) => {
   return 'pill pill-gray'
 }
 
+const statusLabel = (status) => {
+  const value = String(status || '').toUpperCase()
+  if (value === 'ASSIGNED') return 'Asignado'
+  if (value === 'IN_PROGRESS') return 'En proceso'
+  if (value === 'ON_HOLD') return 'En espera'
+  if (value === 'ESCALATED') return 'Escalado'
+  if (value === 'RESOLVED') return 'Resuelto'
+  if (value === 'CLOSED') return 'Cerrado'
+  if (value === 'CANCELLED') return 'Cancelado'
+  return 'Abierto'
+}
+
 const statusClass = (status) => {
   const value = normalize(status)
   if (value.includes('escal')) return 'pill pill-red-outline'
-  if (value.includes('proceso')) return 'pill pill-blue-strong'
-  if (value.includes('cerr') || value.includes('resuel')) return 'pill pill-green'
+  if (value.includes('progress') || value.includes('proceso') || value.includes('hold') || value.includes('espera')) return 'pill pill-blue-strong'
+  if (value.includes('closed') || value.includes('cerr') || value.includes('resolved') || value.includes('resuel')) return 'pill pill-green'
   return 'pill pill-gray'
 }
 
@@ -284,6 +310,8 @@ const formatDate = (date) => {
   if (!date) return 'N/A'
   return new Date(date).toLocaleDateString('es-CO')
 }
+
+const goToDetail = (id) => router.push(`/tickets/${id}`)
 
 onMounted(loadTickets)
 </script>
@@ -469,6 +497,17 @@ onMounted(loadTickets)
 .ticket-title {
   color: #061734 !important;
   font-weight: 900;
+}
+
+.row-action {
+  background: #0f172a;
+  border: 0;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.76rem;
+  font-weight: 900;
+  min-height: 32px;
+  padding: 0 14px;
 }
 
 .pill {
